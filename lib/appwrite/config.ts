@@ -1,0 +1,18 @@
+       
+// NEXT_PUBLIC_APPWRITE_ENDPOINT="https://fra.cloud.appwrite.io/v1"
+// NEXT_PUBLIC_APPWRITE_PROJECT="699bfff1003b17fddf21"
+// NEXT_PUBLIC_APPWRITE_DATABASE="699c011800018900d850"
+// NEXT_PUBLIC_APPWRITE_USERS_COLLECTION="users"
+// NEXT_PUBLIC_APPWRITE_FILES_COLLECTION="files"
+// NEXT_PUBLIC_APPWRITE_BUCKET="699c07d1001deaea0b36"
+// NEXT_APPWRITE_KEY=""
+
+export const appwriteConfig = {
+    endpointUrl: process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!,
+    projectId: process.env.NEXT_PUBLIC_APPWRITE_PROJECT!,
+    databaseId: process.env.NEXT_PUBLIC_APPWRITE_DATABASE!,
+    usersCollectionId: process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION!,
+    filesCollectionId: process.env.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION!,
+    bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET!,
+    secretKey: process.env.NEXT_APPWRITE_KEY!,
+}
