@@ -1,7 +1,7 @@
 'use server';
 
 import { ID, Query } from 'node-appwrite';
-import { createAdminClient } from '../appwrite';
+import { createAdminClient, createSessionClient } from '../appwrite';
 import { appwriteConfig } from '../appwrite/config';
 import { avatarPlaceholderUrl } from '@/constants';
 import { parseStringify } from '../utils';
@@ -71,5 +71,21 @@ export const verifySecret = async ({accountId, password}: {accountId: string; pa
     
   } catch (error) {
     handleError(error, 'Failed to verify OTP');    
+  }
+}
+
+export const getCurrentUser = async () => {
+  try {
+    const {account, databases} = await createSessionClient();
+    const result = await account.get();
+    const user = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal('accountId', result.$id)],
+    )
+    if (user.total <= 0) return null;
+    return parseStringify(user.documents[0]);
+  } catch (error) {
+    console.error(error);    
   }
 }
