@@ -1,3 +1,4 @@
+'use client'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,23 +19,29 @@ import {
 } from '@/components/ui/input-otp';
 import Image from 'next/image';
 import React, { useState } from 'react';
+import { Button } from './ui/button';
+import { sendEmailOTP, verifySecret } from '@/lib/actions/user.actions';
+import { useRouter } from 'next/navigation';
 
 const OtpModal = ({email, accountId}: {email: string; accountId: string}) => {
   const [isOpen, setIsOpen] = useState(true);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setIsLoading(true);
     try {
         // call API to verify OTP
+        const sessionId = await verifySecret({accountId, password});
+        if (sessionId) router.push('/');
     } catch (error) {
         console.log('Failed to verify OTP', error);
     }
     setIsLoading(false);
   }
   const handleResendOtp = async () => {
-    // call API to resend OTP
+    await sendEmailOTP({email});
   }
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -67,8 +74,31 @@ const OtpModal = ({email, accountId}: {email: string; accountId: string}) => {
           </InputOTPGroup>
         </InputOTP>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <div className='flex w-full flex-col gap-4'>
+            <AlertDialogAction
+            onClick={handleSubmit}
+            className='shad-submit-btn h-12'
+            type='button'
+            >
+              Submit
+              {isLoading && (<Image 
+              src='/assets/icons/loader.svg'
+              alt='loader'
+              width={24}
+              height={24}
+              className='ml-2 animate-spin'
+              />)}
+            </AlertDialogAction>
+            <div className='subtitle-2 mt-2 text-center text-light-100'>
+              Didn&apos;t get a code?
+              <Button
+                type='button'
+                variant='link'
+                className='pl-1 text-brand'
+                onClick={handleResendOtp}
+              >Click to resend</Button>
+            </div>
+          </div>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
