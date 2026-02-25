@@ -7,6 +7,8 @@ import { avatarPlaceholderUrl } from '@/constants';
 import { parseStringify } from '../utils';
 import { string } from 'zod';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { error } from 'console';
 
 const getUserByEmail = async (email: string) => {
   const { databases } = await createAdminClient();
@@ -27,7 +29,6 @@ export const sendEmailOTP = async ({ email }: { email: string }) => {
   const { account } = await createAdminClient();
   try {
     const session = await account.createEmailToken(ID.unique(), email);
-    console.log(`sessionEmailOTP->session: ${session}`);
     return session.userId;
   } catch (error) {
     handleError(error, 'Failed to send email OTP');
@@ -36,7 +37,6 @@ export const sendEmailOTP = async ({ email }: { email: string }) => {
 
 export const createAccount = async ({ fullName, email }: { fullName: string; email: string }) => {
   const existingUser = await getUserByEmail(email);
-  console.log(`existingUser: ${existingUser}`);
   const accountId = await sendEmailOTP({ email });
   if (!accountId) throw new Error('Failed to send an OTP');
   if (!existingUser) {
@@ -87,5 +87,30 @@ export const getCurrentUser = async () => {
     return parseStringify(user.documents[0]);
   } catch (error) {
     console.error(error);    
+  }
+}
+
+export const signOutUser = async () => {
+  try {
+    const {account } = await createSessionClient();
+    await account.deleteSession('current');    
+    (await cookies()).delete('appwrite-session');
+  } catch (error) {
+    handleError(error, 'Failed to sign out user');    
+  } finally {
+    redirect('/sign-in');
+  }
+}
+
+export const signInUser = async ({email}: {email: string}) => {
+  try {
+    const existingUser = await getUserByEmail(email);
+    if (existingUser) {
+      await sendEmailOTP({email});
+      return parseStringify({accountId: existingUser.accountId})
+    }
+    return parseStringify({accountId: null, error: 'User not found'})
+  } catch (error) {
+    handleError(error, 'Failed to sign in user');    
   }
 }
